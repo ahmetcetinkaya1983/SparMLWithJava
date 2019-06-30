@@ -9,38 +9,42 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
-public class GymCompetitors {
-	
-	public static void main(String[] args) {
+public class HousePriceAnalysis {
 
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
 		System.setProperty("hadoop.home.dir", "c:/hadoop");
 		Logger.getLogger("org.apache").setLevel(Level.WARN);
 
 		SparkSession spark = SparkSession.builder()
-				.appName("GymCompetitors")
+				.appName("House Price Analysis")
 				.config("spark.sql.warehouse.dir", "file:///c:/tmp/")
 				.master("local[*]").getOrCreate();
 
 		Dataset<Row> csvData = spark.read()
 				.option("header", true)
 				.option("inferSchema", true)
-				.csv("src/main/resources/GymCompetition.csv");
+				.csv("src/main/resources/kc_house_data.csv");
 
 		csvData.printSchema();
 
 		VectorAssembler vectorAssembler = new VectorAssembler();
-		vectorAssembler.setInputCols(new String[] { "Age", "Height", "Weight" });
+		vectorAssembler.setInputCols(new String[] { "bedrooms", "bathrooms", "sqft_living" });
 		vectorAssembler.setOutputCol("features");
 		Dataset<Row> csvDataWithFeatures = vectorAssembler.transform(csvData);
 
-		Dataset<Row> modelInputData = csvDataWithFeatures.select("NoOfReps", "features").withColumnRenamed("NoOfReps","label");
+		Dataset<Row> modelInputData = csvDataWithFeatures.select("price", "features").withColumnRenamed("price","label");
 		
-		modelInputData.show();
+		//			modelInputData.show();
 		
-		LinearRegression linearRegression = new LinearRegression();
-		LinearRegressionModel model = linearRegression.fit(modelInputData);
-		System.out.println("The model has intercept "+model.intercept()+" and coefficients "+model.coefficients());
+		Dataset<Row>[] trainingAndTestData = modelInputData.randomSplit(new double[] { 0.8, 0.2});
+		Dataset<Row> trainingData = trainingAndTestData[0];
+		Dataset<Row> testData = trainingAndTestData[1];
+		
+		LinearRegressionModel model = new LinearRegression().fit(trainingData);
+		model.transform(testData).show();
+		
 
-		model.transform(modelInputData).show();
 	}
+
 }
