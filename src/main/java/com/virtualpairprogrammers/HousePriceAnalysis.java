@@ -70,7 +70,8 @@ public class HousePriceAnalysis {
 		//R2 should be close to 1 and RMSE should be smaller
 		System.out.println("The test data r2 value is " + lrModel.evaluate(holdOutData).r2() + " and the RMSE is " + lrModel.evaluate(holdOutData).rootMeanSquaredError());
 		
-		
+		System.out.println("coefficients : " + lrModel.coefficients() + "intercept : " +lrModel.intercept());
+		System.out.println("regParam : "+lrModel.getRegParam() + " elastic net param : " +lrModel.getElasticNetParam());
 
 	}
 
