@@ -12,6 +12,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.apache.spark.ml.classification.DecisionTreeClassifier;
+import org.apache.spark.ml.classification.RandomForestClassificationModel;
+import org.apache.spark.ml.classification.RandomForestClassifier;
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
 import org.apache.spark.ml.feature.IndexToString;
 import org.apache.spark.ml.feature.StringIndexer;
@@ -95,7 +97,13 @@ public class VPPFreeTrialsDecisionTrees {
 		System.out.println("The accuracy of the model is : " + evaluator.evaluate(predictions) );
 			
 			
-			
+		RandomForestClassifier rfClassifier = new RandomForestClassifier();
+		rfClassifier.setMaxDepth(3);
+		RandomForestClassificationModel rfModel = rfClassifier.fit(trainingData);
+		Dataset<Row> predictions2 = rfModel.transform(holdoutData);
+		predictions2.show();
+		System.out.println(rfModel.toDebugString());
+		System.out.println("The accuracy of the forest model is :" + evaluator.evaluate(predictions2));
 			
 			
 			
