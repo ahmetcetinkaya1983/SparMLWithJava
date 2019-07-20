@@ -10,11 +10,12 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
+import org.apache.spark.ml.classification.DecisionTreeClassifier;
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
 import org.apache.spark.ml.feature.IndexToString;
 import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.ml.feature.VectorAssembler;
-import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
-import org.apache.spark.ml.regression.DecisionTreeRegressor;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -79,13 +80,19 @@ public class VPPFreeTrialsDecisionTrees {
 		Dataset<Row> trainingData = trainingAndHoldoutData[0];
 		Dataset<Row> holdoutData = trainingAndHoldoutData[1];
 		
-		DecisionTreeRegressor dtRegressor = new DecisionTreeRegressor();
-		dtRegressor.setMaxDepth(3);
+		DecisionTreeClassifier dtClassifier = new DecisionTreeClassifier();
+		dtClassifier.setMaxDepth(3);
 		
-		DecisionTreeRegressionModel model = dtRegressor.fit(trainingData);
-		model.transform(holdoutData).show();
+		DecisionTreeClassificationModel model = dtClassifier.fit(trainingData);
+		
+		Dataset<Row> predictions = model.transform(holdoutData);
+		predictions.show();
+		
 		System.out.println(model.toDebugString());
 		
+		MulticlassClassificationEvaluator evaluator = new MulticlassClassificationEvaluator();
+		evaluator.setMetricName("accuracy");
+		System.out.println("The accuracy of the model is : " + evaluator.evaluate(predictions) );
 			
 			
 			
