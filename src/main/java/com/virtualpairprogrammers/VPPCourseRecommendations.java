@@ -44,12 +44,16 @@ public class VPPCourseRecommendations {
 				.setItemCol("courseId")
 				.setRatingCol("proportionWatched");
 		
+		
 //		ALSModel model = als.fit(trainingData);
 //		Dataset<Row> predictions = model.transform(holdoutData);
 //		predictions.show();
 //		
 		
 		ALSModel model = als.fit(csvData);
+		
+		model.setColdStartStrategy("NaN");
+		
 		Dataset<Row> userRecs =model.recommendForAllUsers(5);
 		userRecs.show();
 		List<Row> userRecList = userRecs.takeAsList(5);
